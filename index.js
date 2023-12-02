@@ -5,6 +5,18 @@ const bodyParser = require('body-parser')
 const app = express()
 const path = __dirname + '/views/'
 
+const os = require('os');
+
+const interfaces = os.networkInterfaces();
+for (const key in interfaces) {
+    for (const iface of interfaces[key]) {
+        if (!iface.internal && iface.family === 'IPv4') {
+            console.log(`Found IPv4 address: ${iface.address}`);
+        }
+    }
+}
+
+
 function calculatePricing(start, end){
     const pricing = {
         3: 7.50,
