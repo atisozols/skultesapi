@@ -1,20 +1,26 @@
 const express = require('express')
-require('dotenv').config()
-const stripe = require('stripe')(process.env.STRIPE_KEY)
-const bodyParser = require('body-parser')
 const app = express()
+const bodyParser = require('body-parser')
 const path = __dirname + '/views/'
 
+require('dotenv').config()
 const os = require('os');
 
-const interfaces = os.networkInterfaces();
-for (const key in interfaces) {
-    for (const iface of interfaces[key]) {
-        if (!iface.internal && iface.family === 'IPv4') {
-            console.log(`Found IPv4 address: ${iface.address}`);
-        }
-    }
-}
+const stripe = require('stripe')(process.env.STRIPE_KEY)
+
+const mongoose = require('mongoose')
+const connectDB = require('./config/dbConnection')
+connectDB()
+
+// get ip
+// const interfaces = os.networkInterfaces();
+// for (const key in interfaces) {
+//     for (const iface of interfaces[key]) {
+//         if (!iface.internal && iface.family === 'IPv4') {
+//             console.log(`Found IPv4 address: ${iface.address}`);
+//         }
+//     }
+// }
 
 
 function calculatePricing(start, end){
@@ -91,4 +97,7 @@ app.post('/checkout', async (req, res) => {
 
 const PORT = process.env.PORT || 5000
 
+mongoose.connection.once('open', () => {
+    console.log('Connected to MongoDB')
+})
 app.listen(PORT, () => console.log(`Server running on ${PORT}`))
