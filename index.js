@@ -13,14 +13,14 @@ const connectDB = require('./config/dbConnection')
 connectDB()
 
 // get ip
-// const interfaces = os.networkInterfaces();
-// for (const key in interfaces) {
-//     for (const iface of interfaces[key]) {
-//         if (!iface.internal && iface.family === 'IPv4') {
-//             console.log(`Found IPv4 address: ${iface.address}`);
-//         }
-//     }
-// }
+const interfaces = os.networkInterfaces();
+for (const key in interfaces) {
+    for (const iface of interfaces[key]) {
+        if (!iface.internal && iface.family === 'IPv4') {
+            console.log(`Found IPv4 address: ${iface.address}`);
+        }
+    }
+}
 
 
 function calculatePricing(start, end){
