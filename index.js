@@ -76,10 +76,10 @@ app.post('/checkout', async (req, res) => {
     const session = await stripe.checkout.sessions.create({
         line_items: lineItems,
         mode: 'payment',
-        success_url: 'http://localhost:4242/success',
-        cancel_url: 'http://localhost:4242/cancel',
+        success_url: "https://skultes.cyclic.app/order/success?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url: "https://skultes.cyclic.app",
     });
-  res.send(session.url)
+  res.send({id: session.id, url: session.url})
 //   res.redirect(303, session.url);
 })
 
