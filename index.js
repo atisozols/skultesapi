@@ -87,6 +87,17 @@ app.post('/checkout', async (req, res) => {
     }
 })
 
+app.get('/order/success', async (req, res) => {
+    try{
+        const session = await stripe.checkout.sessions.retrieve(req.query.session_id)
+        const customer = await stripe.customers.retrieve(session.customer)
+    
+        res.send(`<html><body><h1>Thanks for your order, ${customer.name}!</h1></body></html>`)
+    }catch{
+        res.status(400).send({msg: "Bad request!"})
+    }
+  });
+
 const PORT = process.env.PORT || 5000
 
 mongoose.connection.once('open', () => {
