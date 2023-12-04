@@ -69,21 +69,22 @@ app.post('/checkout', async (req, res) => {
                 quantity: 1,
             })
         });
+
+        const session = await stripe.checkout.sessions.create({
+            line_items: lineItems,
+            mode: 'payment',
+            success_url: "https://skultes.cyclic.app/order/success?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url: "https://skultes.cyclic.app",
+        });
+    
+        // šajā momentā būtu jāizveido ieraksts datubaze ar status: cart un session: session.id
+
+        res.send({id: session.id, url: session.url})
+        //   res.redirect(303, session.url);
+        
     } catch (error) {
         res.status(400).send({msg:  error.message})
     }
-
-    const session = await stripe.checkout.sessions.create({
-        line_items: lineItems,
-        mode: 'payment',
-        success_url: "https://skultes.cyclic.app/order/success?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url: "https://skultes.cyclic.app",
-    });
-
-    // šajā momentā būtu jāizveido ieraksts datubaze ar status: cart un session: session.id
-
-  res.send({id: session.id, url: session.url})
-//   res.redirect(303, session.url);
 })
 
 const PORT = process.env.PORT || 5000
