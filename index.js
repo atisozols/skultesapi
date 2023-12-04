@@ -88,16 +88,19 @@ app.post('/checkout', async (req, res) => {
 })
 
 app.get('/order/success', async (req, res) => {
-    const session = await stripe.checkout.sessions.retrieve(req.query.session_id)
-    const customer = await stripe.customers.retrieve(session.customer)
-
-    res.send(`<html><body><h1>Thanks for your order, ${customer.name}!</h1></body></html>`)
-
-    // try{
-        
-    // }catch{
-    //     res.status(400).send({msg: "Bad request!"})
-    // }
+    
+    try{
+        const session = await stripe.checkout.sessions.retrieve(req.query.session_id)
+        console.log(session.customer_details)
+        if(session.customer_details.name){
+            res.send(`<html><body><h1>Thanks for your order, ${session.customer_details.name}!</h1></body></html>`)
+        }else if (session.customer_details.email){
+            res.send(`<html><body><h1>Thanks for your order, ${session.customer_details.email}!</h1></body></html>`)
+        }
+        res.send(`<html><body><h1>Thanks for your order!</h1></body></html>`)
+    }catch(error){
+        res.status(400).send({msg:  error.message})
+    }
   });
 
 const PORT = process.env.PORT || 5000
