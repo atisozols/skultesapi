@@ -103,14 +103,13 @@ app.post('/checkout-session', async (req, res) => {
 
 app.post('/webhook', bodyParser.raw({type: 'application/json'}), (req, res) => {
     const sig = req.headers['stripe-signature'];
-    const rawBody = req.body.toString('utf8');
 
     let event;
     const key = process.env.PAYMENT_SIGNATURE
     if(key) console.log('key exists')
 
     try {
-        event = stripe.webhooks.constructEvent(rawBody, sig, key);
+        event = stripe.webhooks.constructEvent(req.body, sig, key);
     } catch (err) {
         res.status(400).send(`Webhook Error: ${err.message}`);
         return;
