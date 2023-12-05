@@ -61,25 +61,25 @@ app.get('/', (req, res) => {
 })
 
 app.post('/checkout', async (req, res) => {
-    const lineItems = []
+    const lineItems = [];
 
     try {
         req.body.forEach(item => {
-            if(!calculatePricing(parseInt(item.start_index), parseInt(item.end_index))){
-                res.status(400).send({msg: "Bad request!"})
-                return;
+            if (!calculatePricing(parseInt(item.start_index), parseInt(item.end_index))) {
+                res.status(400).send({ msg: "Bad request!" });
+                return; // Ensure to exit the function after sending the response
             }
             lineItems.push({
                 price_data: {
-                currency: 'eur',
-                product_data: {
-                    name: 'Skultes Gym rezervācija',
-                    description: item.date_text + ' ' + item.start_time + ' - ' + item.end_time,
-                },
-                unit_amount: calculatePricing(parseInt(item.start_index), parseInt(item.end_index)) * 100,
+                    currency: 'eur',
+                    product_data: {
+                        name: 'Skultes Gym rezervācija',
+                        description: item.date_text + ' ' + item.start_time + ' - ' + item.end_time,
+                    },
+                    unit_amount: calculatePricing(parseInt(item.start_index), parseInt(item.end_index)) * 100,
                 },
                 quantity: 1,
-            })
+            });
         });
 
         const session = await stripe.checkout.sessions.create({
@@ -88,15 +88,52 @@ app.post('/checkout', async (req, res) => {
             success_url: "https://skultes.cyclic.app/#/success?session_id={CHECKOUT_SESSION_ID}",
             cancel_url: "https://skultes.cyclic.app",
         });
-    
-        // šajā momentā būtu jāizveido ieraksts datubaze ar status: cart un session: session.id
 
-        res.send({id: session.id, url: session.url})
+        res.send({ id: session.id, url: session.url }); // Send the response here
         
     } catch (error) {
-        res.status(400).send({msg:  error.message})
+        res.status(400).send({ msg: error.message });
     }
-})
+});
+
+
+// app.post('/checkout', async (req, res) => {
+//     const lineItems = []
+
+//     try {
+//         req.body.forEach(item => {
+//             if(!calculatePricing(parseInt(item.start_index), parseInt(item.end_index))){
+//                 res.status(400).send({msg: "Bad request!"})
+//                 return;
+//             }
+//             lineItems.push({
+//                 price_data: {
+//                 currency: 'eur',
+//                 product_data: {
+//                     name: 'Skultes Gym rezervācija',
+//                     description: item.date_text + ' ' + item.start_time + ' - ' + item.end_time,
+//                 },
+//                 unit_amount: calculatePricing(parseInt(item.start_index), parseInt(item.end_index)) * 100,
+//                 },
+//                 quantity: 1,
+//             })
+//         });
+
+//         const session = await stripe.checkout.sessions.create({
+//             line_items: lineItems,
+//             mode: 'payment',
+//             success_url: "https://skultes.cyclic.app/#/success?session_id={CHECKOUT_SESSION_ID}",
+//             cancel_url: "https://skultes.cyclic.app",
+//         });
+    
+//         // šajā momentā būtu jāizveido ieraksts datubaze ar status: cart un session: session.id
+
+//         res.send({id: session.id, url: session.url})
+        
+//     } catch (error) {
+//         res.status(400).send({msg:  error.message})
+//     }
+// })
 
 app.post('/checkout-session', async (req, res) => {
     try{
