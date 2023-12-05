@@ -91,12 +91,12 @@ app.post('/checkout', async (req, res) => {
     }
 })
 
-app.get('/checkout', async (req, res) => {
+app.post('/checkout-session', async (req, res) => {
     try{
-        console.log(req.body.session_id)
-        res.send({payment_status: "paid"})
-        // const session = await stripe.checkout.sessions.retrieve(req.query.session_id)
-        // res.send({payment_status: session.payment_status})
+        // console.log(req.body.session_id)
+        // res.send({payment_status: "paid"})
+        const session = await stripe.checkout.sessions.retrieve(req.query.session_id)
+        res.send({payment_status: session.payment_status})
     }catch(error){
         res.status(400).send({msg:  error.message})
     }
