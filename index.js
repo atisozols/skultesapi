@@ -101,17 +101,18 @@ app.post('/checkout-session', async (req, res) => {
     }
   });
 
-app.post('/webhook', bodyParser.raw({type: 'application/json'}), (request, response) => {
+app.post('/webhook', bodyParser.raw({type: 'application/json'}), (req, res) => {
     const sig = request.headers['stripe-signature'];
+    const rawBody = req.body.toString('utf8');
 
     let event;
     const key = process.env.PAYMENT_SIGNATURE
     if(key) console.log('key exists')
 
     try {
-        event = stripe.webhooks.constructEvent(request.body, sig, key);
+        event = stripe.webhooks.constructEvent(rawBody, sig, key);
     } catch (err) {
-        response.status(400).send(`Webhook Error: ${err.message}`);
+        res.status(400).send(`Webhook Error: ${err.message}`);
         return;
     }
 
@@ -142,7 +143,7 @@ app.post('/webhook', bodyParser.raw({type: 'application/json'}), (request, respo
     }
 
     // Return a 200 response to acknowledge receipt of the event
-    response.send();
+    res.send();
 });
 
 const PORT = process.env.PORT || 5000
