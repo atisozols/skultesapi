@@ -102,7 +102,7 @@ app.post('/checkout-session', async (req, res) => {
   });
 
 app.post('/webhook', bodyParser.raw({type: 'application/json'}), (req, res) => {
-    const sig = request.headers['stripe-signature'];
+    const sig = req.headers['stripe-signature'];
     const rawBody = req.body.toString('utf8');
 
     let event;
