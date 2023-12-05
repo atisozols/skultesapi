@@ -105,9 +105,11 @@ app.post('/webhook', express.raw({type: 'application/json'}), (request, response
     const sig = request.headers['stripe-signature'];
 
     let event;
+    const key = process.env.PAYMENT_SIGNATURE
+    if(key) console.log('key exists')
 
     try {
-        event = stripe.webhooks.constructEvent(request.body, sig, process.env.PAYMENT_SIGNATURE);
+        event = stripe.webhooks.constructEvent(request.body, sig, key);
     } catch (err) {
         response.status(400).send(`Webhook Error: ${err.message}`);
         return;
