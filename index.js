@@ -95,7 +95,7 @@ app.post('/checkout-session', async (req, res) => {
     try{
         // console.log(req.body.session_id)
         // res.send({payment_status: "paid"})
-        const session = await stripe.checkout.sessions.retrieve(req.query.session_id)
+        const session = await stripe.checkout.sessions.retrieve(req.body.session_id)
         res.send({payment_status: session.payment_status})
     }catch(error){
         res.status(400).send({msg:  error.message})
