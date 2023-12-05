@@ -1,12 +1,16 @@
+// express
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 const path = __dirname + '/views/'
 
+// .env
 require('dotenv').config()
 
+// stripe
 const stripe = require('stripe')(process.env.STRIPE_KEY)
 
+// MongoDB/mongoose
 const mongoose = require('mongoose')
 const connectDB = require('./config/dbConnection')
 connectDB()
@@ -87,17 +91,10 @@ app.post('/checkout', async (req, res) => {
     }
 })
 
-app.get('/order/success', async (req, res) => {
-    
+app.get('/checkout', async (req, res) => {
     try{
         const session = await stripe.checkout.sessions.retrieve(req.query.session_id)
-        console.log(session.customer_details)
-        if(session.customer_details.name){
-            res.send(`<html><body><h1>Thanks for your order, ${session.customer_details.name}!</h1></body></html>`)
-        }else if (session.customer_details.email){
-            res.send(`<html><body><h1>Thanks for your order, ${session.customer_details.email}!</h1></body></html>`)
-        }
-        res.send(`<html><body><h1>Thanks for your order!</h1></body></html>`)
+        res.send({payment_status: session.payment_status})
     }catch(error){
         res.status(400).send({msg:  error.message})
     }
