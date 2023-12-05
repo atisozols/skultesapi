@@ -44,7 +44,14 @@ function calculatePricing(start, end){
         }
     }
 }
-
+app.use((req, res, next) => {
+    bodyParser.raw({ type: 'application/json' })(req, res, err => {
+        if (err) {
+            return res.status(400).send('Webhook Error: Invalid body');
+        }
+        next();
+    });
+});
 app.use(express.static(path))
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -101,7 +108,7 @@ app.post('/checkout-session', async (req, res) => {
     }
   });
 
-app.post('/webhook', bodyParser.raw({type: 'application/json'}), (req, res) => {
+app.post('/webhook', (req, res) => {
     const sig = req.headers['stripe-signature'];
 
     let event;
