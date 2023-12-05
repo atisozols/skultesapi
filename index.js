@@ -66,6 +66,7 @@ app.post('/checkout', async (req, res) => {
     try {
         req.body.forEach(item => {
             if (!calculatePricing(parseInt(item.start_index), parseInt(item.end_index))) {
+                console.log(calculatePricing(parseInt(item.start_index), parseInt(item.end_index)))
                 res.status(400).send({ msg: "Bad request!" });
                 return; // Ensure to exit the function after sending the response
             }
