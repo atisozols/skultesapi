@@ -60,7 +60,8 @@ app.get('/', (req, res) => {
     res.sendFile(path + 'index.html')
 })
 
-app.post('/checkout', async (req, res) => {
+app.post('/checkout', async (request, res) => {
+    const req = request.toString('utf-8')
     const lineItems = [];
 
     try {
