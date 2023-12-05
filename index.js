@@ -67,6 +67,7 @@ app.post('/checkout', async (req, res) => {
         req.body.forEach(item => {
             if(!calculatePricing(parseInt(item.start_index), parseInt(item.end_index))){
                 res.status(400).send({msg: "Bad request!"})
+                return;
             }
             lineItems.push({
                 price_data: {
@@ -91,7 +92,6 @@ app.post('/checkout', async (req, res) => {
         // šajā momentā būtu jāizveido ieraksts datubaze ar status: cart un session: session.id
 
         res.send({id: session.id, url: session.url})
-        //   res.redirect(303, session.url);
         
     } catch (error) {
         res.status(400).send({msg:  error.message})
