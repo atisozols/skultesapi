@@ -74,6 +74,7 @@ app.get('/', (req, res) => {
 
 app.post('/checkout', async (req, res) => {
     const lineItems = [];
+    const appointments = [];
 
     try {
         req.body.forEach(item => {
@@ -93,6 +94,9 @@ app.post('/checkout', async (req, res) => {
                 },
                 quantity: 1,
             });
+            
+            // seit jau veidot appointment documentus
+
         });
 
         const session = await stripe.checkout.sessions.create({
