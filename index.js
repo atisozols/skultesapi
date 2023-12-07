@@ -1,11 +1,15 @@
+// .env
+require('dotenv').config()
+
 // express
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 const path = __dirname + '/views/'
-
-// .env
-require('dotenv').config()
+const cors = require('cors');
+const corsOptions = require('./config/corsOptions');
+const PORT = process.env.PORT || 5000
+const calculatePricing = require('./functions/calculatePricing')
 
 // stripe
 const stripe = require('stripe')(process.env.STRIPE_KEY)
@@ -14,36 +18,6 @@ const stripe = require('stripe')(process.env.STRIPE_KEY)
 const mongoose = require('mongoose')
 const connectDB = require('./config/dbConnection')
 connectDB()
-
-function calculatePricing(start, end){
-    const pricing = {
-        3: 7.50,
-        4: 10.00,
-        5: 12.50,
-        6: 15.00
-    }
-    const pricingCheap = {
-        3: 5.00,
-        4: 6.50,
-        5: 8.50,
-        6: 10.00 
-    }
-
-    if(start > 30){
-        if(pricing[end - start]){
-            return pricing[end - start]
-        } else{
-            return 0
-        } 
-    }
-    else{
-        if(pricingCheap[end - start]){
-            return pricingCheap[end - start]
-        } else{
-            return 0
-        }
-    }
-}
 
 app.post('/webhook', bodyParser.raw({ type: 'application/json' }), (req, res) => {
     const sig = req.headers['stripe-signature'];
@@ -89,6 +63,7 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), (req, res) =>
     res.send();
 });
 
+app.use(cors(corsOptions))
 app.use(express.static(path))
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -127,51 +102,14 @@ app.post('/checkout', async (req, res) => {
             cancel_url: "https://skultes.cyclic.app",
         });
 
-        res.send({ id: session.id, url: session.url }); // Send the response here
+        // data insert
+
+        res.send({ id: session.id, url: session.url });
         
     } catch (error) {
         res.status(400).send({ msg: error.message });
     }
 });
-
-
-// app.post('/checkout', async (req, res) => {
-//     const lineItems = []
-
-//     try {
-//         req.body.forEach(item => {
-//             if(!calculatePricing(parseInt(item.start_index), parseInt(item.end_index))){
-//                 res.status(400).send({msg: "Bad request!"})
-//                 return;
-//             }
-//             lineItems.push({
-//                 price_data: {
-//                 currency: 'eur',
-//                 product_data: {
-//                     name: 'Skultes Gym rezervācija',
-//                     description: item.date_text + ' ' + item.start_time + ' - ' + item.end_time,
-//                 },
-//                 unit_amount: calculatePricing(parseInt(item.start_index), parseInt(item.end_index)) * 100,
-//                 },
-//                 quantity: 1,
-//             })
-//         });
-
-//         const session = await stripe.checkout.sessions.create({
-//             line_items: lineItems,
-//             mode: 'payment',
-//             success_url: "https://skultes.cyclic.app/#/success?session_id={CHECKOUT_SESSION_ID}",
-//             cancel_url: "https://skultes.cyclic.app",
-//         });
-    
-//         // šajā momentā būtu jāizveido ieraksts datubaze ar status: cart un session: session.id
-
-//         res.send({id: session.id, url: session.url})
-        
-//     } catch (error) {
-//         res.status(400).send({msg:  error.message})
-//     }
-// })
 
 app.post('/checkout-session', async (req, res) => {
     try{
@@ -182,10 +120,6 @@ app.post('/checkout-session', async (req, res) => {
         res.status(400).send({msg:  error.message})
     }
   });
-
-
-
-const PORT = process.env.PORT || 5000
 
 mongoose.connection.once('open', () => {
     console.log('Connected to MongoDB')
