@@ -1,6 +1,7 @@
 const Appointment = require('../model/Appointment');
 const moment = require('moment');
 const pricing = require('../config/pricing')
+const timeslots = require('../config/timeslots')
 
 const createAppointmentMiddleware = async (req, res, next) => {
 
@@ -24,11 +25,11 @@ const createAppointmentMiddleware = async (req, res, next) => {
         range:{
             start:{
                 index: appointment.start_index,
-                time: appointment.start_time
+                time: timeslots[appointment.start_index]
             },
             end:{
                 index: appointment.end_index,
-                time: appointment.end_time
+                time: timeslots[appointment.end_index]
             }
         },
         price: price * 100
@@ -42,21 +43,25 @@ const createAppointmentMiddleware = async (req, res, next) => {
             $gte: inputStart,
             $lte: inputEnd
         },
+        // status: 'paid',
         $or: [
             {
-            'range.start.index': { $gte: startRange, $lte: endRange }
+              'range.start.index': { $lt: endRange },
+              'range.end.index': { $gt: startRange }
             },
             {
-            'range.end.index': { $gte: startRange, $lte: endRange }
+              $and: [
+                { 'range.start.index': { $gte: startRange, $lt: endRange } },
+                { 'range.end.index': { $gt: endRange } }
+              ]
             },
             {
-            $and: [
-                { 'range.start.index': { $lte: startRange } },
-                { 'range.end.index': { $gte: endRange } }
-            ]
+              $and: [
+                { 'range.start.index': { $lt: startRange } },
+                { 'range.end.index': { $lte: endRange, $gt: startRange } }
+              ]
             }
-        ]
-        });
+        ]});
     });
 
 

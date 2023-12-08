@@ -34,9 +34,6 @@ const createCheckout = async (req, res) => {
             }
         })
 
-        console.log(appointments)
-
-        // data insert ar session id
         const createdAppointments = await Appointment.insertMany(appointments)
         res.send({created: createdAppointments})
 
