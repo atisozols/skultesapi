@@ -1,0 +1,12 @@
+const express = require('express');
+const router = express.Router();
+const checkoutController = require('../../controllers/checkoutController')
+const appointmentHandler = require('../../middleware/appointmentHandler')
+
+router.route('/checkout')
+    .post(appointmentHandler.createAppointmentMiddleware, checkoutController.createCheckout);
+
+router.post('/checkout-session')
+    .post(checkoutController.getCheckoutSession);
+
+module.exports = router

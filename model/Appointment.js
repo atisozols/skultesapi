@@ -36,6 +36,10 @@ const appointmentSchema = new Schema({
             }
         }
     },
+    price: {
+        type: Number,
+        required: true
+    },
     checkout: String,
     status: {
         type: String,
