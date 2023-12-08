@@ -35,9 +35,9 @@ const createCheckout = async (req, res) => {
         })
 
         const createdAppointments = await Appointment.insertMany(appointments)
-        res.send({created: createdAppointments})
+        // res.send({created: createdAppointments})
 
-        // res.send({ id: session.id, url: session.url });
+        res.send({ id: session.id, url: session.url });
         
     } catch (error) {
         res.status(400).send({ msg: error.message });
