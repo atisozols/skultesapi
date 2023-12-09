@@ -68,7 +68,7 @@ app.use(express.static(path))
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.use('/api/', require('./routes/api/checkout'))
+app.use('/api/checkout/', require('./routes/api/checkout'))
 
 app.use('/api/pricing/', require('./routes/api/pricing'))
 
