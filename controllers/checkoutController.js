@@ -23,8 +23,8 @@ const createCheckout = async (req, res) => {
         const session = await stripe.checkout.sessions.create({
             line_items: lineItems,
             mode: 'payment',
-            success_url: "https://skultesgym.lv/#/success?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url: "https://skultesgym.lv",
+            success_url: process.env.HOST_URL + "/#/success?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url: process.env.HOST_URL,
         });
 
         const appointments = req.body.map( appointment => {
