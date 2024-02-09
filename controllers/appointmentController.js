@@ -1,3 +1,7 @@
 const Appointment = require('../model/Appointment')
-const moment = require('moment')
 
+const getAvailability = (req, res) => {
+
+}
+
+module.exports = { getAvailability }

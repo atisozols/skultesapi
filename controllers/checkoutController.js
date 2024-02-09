@@ -1,5 +1,4 @@
 require('dotenv').config()
-const moment = require('moment')
 const stripe = require('stripe')(process.env.STRIPE_KEY)
 const Appointment = require('../model/Appointment')
 
@@ -19,6 +18,8 @@ const createCheckout = async (req, res) => {
                 quantity: 1,
             });
         });
+
+        console.log(lineItems)
 
         const session = await stripe.checkout.sessions.create({
             line_items: lineItems,
