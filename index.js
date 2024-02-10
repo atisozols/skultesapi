@@ -72,6 +72,8 @@ app.use('/api/checkout/', require('./routes/api/checkout'))
 
 app.use('/api/pricing/', require('./routes/api/pricing'))
 
+app.use('/api/availability/', require('./routes/api/appointments'))
+
 app.get('/', (req, res) => {
     res.sendFile(path + 'index.html')
 })
