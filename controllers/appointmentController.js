@@ -3,12 +3,21 @@ const moment = require('moment');
 
 const getAvailability = async (req, res) => {
     try {
-        const currentWeekMonday = moment().startOf('day');
+        // Get the current week's Monday
+        const currentDay = moment().startOf('day');
 
+        // Generate an array of dates for the whole week
+        const weekDates = [];
+        for (let i = 1; i < 15; i++) {
+            const date = moment(currentDay).add(i, 'days').toDate();
+            weekDates.push(date);
+        }
+
+        // Fetch availability data from the database
         const unavailableRanges = await Appointment.aggregate([
             {
                 $match: {
-                    date: { $gte: currentWeekMonday.toDate() },
+                    date: { $gte: currentDay.toDate() },
                     status: 'paid'
                 }
             },
@@ -24,19 +33,19 @@ const getAvailability = async (req, res) => {
             }
         ]);
 
-        const availability = unavailableRanges.map(availabilityDate => {
-            const { year, month, day } = availabilityDate._id;
-            const date = new Date(year, month - 1, day);
-
-            availabilityDate.ranges.sort((a, b) => a.start.index - b.start.index);
+        // Merge availability data with the whole week's dates
+        const availability = weekDates.map(date => {
+            const foundAvailability = unavailableRanges.find(avail => {
+                const { year, month, day } = avail._id;
+                const availDate = new Date(year, month - 1, day);
+                return moment(date).isSame(availDate, 'day');
+            });
 
             return {
                 date,
-                ranges: availabilityDate.ranges
+                ranges: foundAvailability ? foundAvailability.ranges : []
             };
         });
-
-        availability.sort((a, b) => a.date - b.date);
 
         res.json(availability);
     } catch (error) {
