@@ -19,8 +19,6 @@ const createCheckout = async (req, res) => {
             });
         });
 
-        console.log(lineItems)
-
         const session = await stripe.checkout.sessions.create({
             line_items: lineItems,
             mode: 'payment',
@@ -49,7 +47,6 @@ const getCheckoutSession = async (req, res) => {
     try{
         console.log('Getting session', req.params.id)
         const session = await stripe.checkout.sessions.retrieve(req.params.id)
-        // res.send(session)
         res.send({payment_status: session.payment_status})
     }catch(error){
         res.status(400).send({msg:  error.message})
