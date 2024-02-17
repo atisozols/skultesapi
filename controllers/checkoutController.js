@@ -1,5 +1,4 @@
 require('dotenv').config()
-const moment = require('moment')
 const stripe = require('stripe')(process.env.STRIPE_KEY)
 const Appointment = require('../model/Appointment')
 
@@ -23,8 +22,8 @@ const createCheckout = async (req, res) => {
         const session = await stripe.checkout.sessions.create({
             line_items: lineItems,
             mode: 'payment',
-            success_url: "https://skultesgym.lv/#/success?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url: "https://skultesgym.lv",
+            success_url: process.env.HOST_URL + "/#/success?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url: process.env.HOST_URL,
         });
 
         const appointments = req.body.map( appointment => {
@@ -48,7 +47,6 @@ const getCheckoutSession = async (req, res) => {
     try{
         console.log('Getting session', req.params.id)
         const session = await stripe.checkout.sessions.retrieve(req.params.id)
-        // res.send(session)
         res.send({payment_status: session.payment_status})
     }catch(error){
         res.status(400).send({msg:  error.message})

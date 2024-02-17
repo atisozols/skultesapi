@@ -43,7 +43,7 @@ const createAppointmentMiddleware = async (req, res, next) => {
             $gte: inputStart,
             $lte: inputEnd
         },
-        // status: 'paid',
+        status: 'paid',
         $or: [
             {
               'range.start.index': { $lt: endRange },

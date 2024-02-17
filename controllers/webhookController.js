@@ -24,12 +24,39 @@ const handleWebhook = async (req, res) => {
         case 'checkout.session.async_payment_succeeded':
         const checkoutSessionAsyncPaymentSucceeded = event.data.object;
         console.log('Session', checkoutSessionAsyncPaymentSucceeded.id, 'async payment succeeded')
-        // Then define and call a function to handle the event checkout.session.async_payment_succeeded
+        try {    
+            const result = await Appointment.updateMany(
+                { checkout: checkoutSessionAsyncPaymentSucceeded.id },
+                { $set: { status: 'paid' } }
+            );
+    
+            if (result.nModified === 0) {
+                console.error("No appointments found for the given ID" );
+            }
+    
+            console.log(`${result.nModified} appointments updated successfully`);
+        } catch (error) {
+            console.error("Error updating appointments:", error);
+        }
         break;
         case 'checkout.session.completed':
         const checkoutSessionCompleted = event.data.object;
         console.log('Session', checkoutSessionCompleted.id, 'completed')
-        // Then define and call a function to handle the event checkout.session.completed
+        try {    
+            const result = await Appointment.updateMany(
+                { checkout: checkoutSessionCompleted.id },
+                { $set: { status: 'paid' } }
+            );
+    
+            if (result.nModified === 0) {
+                console.error("No appointments found for the given ID" );
+            }
+    
+            console.log(`${result.nModified} appointments updated successfully`);
+        } catch (error) {
+            console.error("Error updating appointments:", error);
+        }
+        
         break;
         case 'checkout.session.expired':
         const checkoutSessionExpired = event.data.object;
