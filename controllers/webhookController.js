@@ -1,5 +1,6 @@
 const stripe = require('stripe')(process.env.STRIPE_KEY);
-const Appointment = require('../model/Appointment')
+const Appointment = require('../model/Appointment');
+const eventController = require('./eventController');
 
 const handleWebhook = async (req, res) => {
     const sig = req.headers['stripe-signature'];
@@ -24,17 +25,41 @@ const handleWebhook = async (req, res) => {
         case 'checkout.session.async_payment_succeeded':
         const checkoutSessionAsyncPaymentSucceeded = event.data.object;
         console.log('Session', checkoutSessionAsyncPaymentSucceeded.id, 'async payment succeeded')
-        try {    
+        try { 
             const result = await Appointment.updateMany(
                 { checkout: checkoutSessionAsyncPaymentSucceeded.id },
                 { $set: { status: 'paid' } }
             );
-    
-            if (result.nModified === 0) {
+
+            const events = await Appointment.find(
+                { checkout: checkoutSessionAsyncPaymentSucceeded.id }
+            );
+
+            events.forEach( appointment => {
+                const eventDetails = {
+                    summary: appointment.name,
+                    colorId: '3',
+                    description: appointment.phone,
+                    start: {
+                        dateTime: appointment.date.slice(0,10) + 'T' + appointment.start.time + ':00',
+                        timeZone: 'Europe/Riga'
+                    },
+                    end: {
+                        dateTime: appointment.date.slice(0,10) + 'T' + appointment.end.time + ':00',
+                        timeZone: 'Europe/Riga'
+                    }
+                };
+
+                eventController.addEventToCalendar(eventDetails);
+            })
+
+
+
+            if (result.modifiedCount === 0) {
                 console.error("No appointments found for the given ID" );
             }
     
-            console.log(`${result.nModified} appointments updated successfully`);
+            console.log(`${result.modifiedCount} appointments updated successfully`);
         } catch (error) {
             console.error("Error updating appointments:", error);
         }

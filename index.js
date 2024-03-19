@@ -8,7 +8,8 @@ const bodyParser = require('body-parser')
 const path = __dirname + '/views/'
 const cors = require('cors');
 const corsOptions = require('./config/corsOptions');
-const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT || 5000;
+const eventController = require('./controllers/eventController');
 
 // stripe
 // const stripe = require('stripe')(process.env.STRIPE_KEY)
@@ -80,6 +81,9 @@ app.get('/', (req, res) => {
 
 mongoose.connection.once('open', () => {
     console.log('Connected to MongoDB')
+    eventController.addEventToCalendar().then(res => {
+        console.log(res)
+    })
     app.listen(PORT, () => console.log(`Server running on ${PORT}`))
 })
 
