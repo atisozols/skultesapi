@@ -3,12 +3,11 @@ const moment = require('moment');
 
 const getAvailability = async (req, res) => {
     try {
-        // Get the current week's Monday
         const currentDay = moment().startOf('day');
 
         // Generate an array of dates for the whole week
         const weekDates = [];
-        for (let i = 1; i < 15; i++) {
+        for (let i = 0; i < 14; i++) {
             const date = moment(currentDay).add(i, 'days').toDate();
             weekDates.push(date);
         }
