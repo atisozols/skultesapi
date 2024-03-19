@@ -9,7 +9,7 @@ const getAvailability = async (req, res) => {
         const weekDates = [];
         for (let i = 0; i < 14; i++) {
             const date = moment(currentDay).add(i, 'days').toDate();
-            weekDates.push(date);
+            weekDates.push(moment(date).utcOffset(0, true).toDate());
         }
 
         // Fetch availability data from the database
