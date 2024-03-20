@@ -81,9 +81,6 @@ app.get('/', (req, res) => {
 
 mongoose.connection.once('open', () => {
     console.log('Connected to MongoDB')
-    eventController.addEventToCalendar().then(res => {
-        console.log(res)
-    })
     app.listen(PORT, () => console.log(`Server running on ${PORT}`))
 })
 
