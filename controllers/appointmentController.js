@@ -3,13 +3,13 @@ const moment = require('moment');
 
 const getAvailability = async (req, res) => {
     try {
-        const currentDay = moment().startOf('day');
+        const currentDay = moment().startOf('day').utcOffset(0, true);
 
         // Generate an array of dates for the whole week
         const weekDates = [];
         for (let i = 0; i < 14; i++) {
-            const date = moment(currentDay).add(i, 'days').toDate();
-            weekDates.push(moment(date).utcOffset(0, true).toDate());
+            const date = moment(currentDay).add(i, 'days');
+            weekDates.push(date.startOf('day').toDate());
         }
 
         // Fetch availability data from the database
