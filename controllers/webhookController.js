@@ -31,31 +31,32 @@ const handleWebhook = async (req, res) => {
                 { $set: { status: 'paid' } }
             );
 
-            const events = await Appointment.find(
-                { checkout: checkoutSessionAsyncPaymentSucceeded.id }
-            );
-
-            events.forEach( appointment => {
-                const eventDetails = {
-                    summary: appointment.name,
-                    colorId: '3',
-                    description: appointment.phone,
-                    start: {
-                        dateTime: appointment.date.slice(0,10) + 'T' + appointment.start.time + ':00',
-                        timeZone: 'Europe/Riga'
-                    },
-                    end: {
-                        dateTime: appointment.date.slice(0,10) + 'T' + appointment.end.time + ':00',
-                        timeZone: 'Europe/Riga'
-                    }
-                };
-
-                console.log("details", eventDetails)
-
-                eventController.addEventToCalendar(eventDetails, eventController.calendar).then(() => {
-                    console.log("Event created for " + appointment.name)
-                });
+            Appointment.find({ checkout: checkoutSessionAsyncPaymentSucceeded.id }).then((events) => {
+                console.log("found:", events);
+                events.forEach( appointment => {
+                    const eventDetails = {
+                        summary: appointment.name,
+                        colorId: '3',
+                        description: appointment.phone,
+                        start: {
+                            dateTime: appointment.date.slice(0,10) + 'T' + appointment.start.time + ':00',
+                            timeZone: 'Europe/Riga'
+                        },
+                        end: {
+                            dateTime: appointment.date.slice(0,10) + 'T' + appointment.end.time + ':00',
+                            timeZone: 'Europe/Riga'
+                        }
+                    };
+    
+                    console.log("details", eventDetails)
+    
+                    eventController.addEventToCalendar(eventDetails, eventController.calendar).then(() => {
+                        console.log("Event created for " + appointment.name)
+                    });
+                })
             })
+
+            
 
 
 
