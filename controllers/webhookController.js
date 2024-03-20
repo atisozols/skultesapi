@@ -31,35 +31,54 @@ const handleWebhook = async (req, res) => {
                 { $set: { status: 'paid' } }
             );
 
-            Appointment.find({ checkout: checkoutSessionAsyncPaymentSucceeded.id }).then((events) => {
-                console.log("found:", events);
-                events.forEach( appointment => {
-                    const eventDetails = {
-                        summary: appointment.name,
-                        colorId: '3',
-                        description: appointment.phone,
-                        start: {
-                            dateTime: appointment.date.slice(0,10) + 'T' + appointment.start.time + ':00',
-                            timeZone: 'Europe/Riga'
-                        },
-                        end: {
-                            dateTime: appointment.date.slice(0,10) + 'T' + appointment.end.time + ':00',
-                            timeZone: 'Europe/Riga'
-                        }
-                    };
+            for await (const appointment of Appointment.find({ checkout: checkoutSessionAsyncPaymentSucceeded.id })) {
+                const eventDetails = {
+                    summary: appointment.name,
+                    colorId: '3',
+                    description: appointment.phone,
+                    start: {
+                        dateTime: appointment.date.slice(0,10) + 'T' + appointment.start.time + ':00',
+                        timeZone: 'Europe/Riga'
+                    },
+                    end: {
+                        dateTime: appointment.date.slice(0,10) + 'T' + appointment.end.time + ':00',
+                        timeZone: 'Europe/Riga'
+                    }
+                };
+
+                console.log("details", eventDetails)
+
+                eventController.addEventToCalendar(eventDetails, eventController.calendar).then(() => {
+                    console.log("Event created for " + appointment.name)
+                });
+            }
+
+            // Appointment.find({ checkout: checkoutSessionAsyncPaymentSucceeded.id }).then((events) => {
+            //     console.log("found:", events);
+            //     events.forEach( appointment => {
+            //         const eventDetails = {
+            //             summary: appointment.name,
+            //             colorId: '3',
+            //             description: appointment.phone,
+            //             start: {
+            //                 dateTime: appointment.date.slice(0,10) + 'T' + appointment.start.time + ':00',
+            //                 timeZone: 'Europe/Riga'
+            //             },
+            //             end: {
+            //                 dateTime: appointment.date.slice(0,10) + 'T' + appointment.end.time + ':00',
+            //                 timeZone: 'Europe/Riga'
+            //             }
+            //         };
     
-                    console.log("details", eventDetails)
+            //         console.log("details", eventDetails)
     
-                    eventController.addEventToCalendar(eventDetails, eventController.calendar).then(() => {
-                        console.log("Event created for " + appointment.name)
-                    });
-                })
-            })
+            //         eventController.addEventToCalendar(eventDetails, eventController.calendar).then(() => {
+            //             console.log("Event created for " + appointment.name)
+            //         });
+            //     })
+            // })
 
             
-
-
-
             if (result.modifiedCount === 0) {
                 console.error("No appointments found for the given ID" );
             }
