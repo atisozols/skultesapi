@@ -50,7 +50,9 @@ const handleWebhook = async (req, res) => {
                     }
                 };
 
-                eventController.addEventToCalendar(eventDetails).then(() => {
+                console.log("details", eventDetails)
+
+                eventController.addEventToCalendar(eventDetails, eventController.calendar).then(() => {
                     console.log("Event created for " + appointment.name)
                 });
             })

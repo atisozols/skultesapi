@@ -1,19 +1,18 @@
 const { google } = require('googleapis');
-// const key = require('../skultes-gym-service-account.json');
+
+// Set up JWT authentication
+const jwtClient = new google.auth.JWT(
+    process.env.GOOGLE_USER,
+    null,
+    process.env.GOOGLE_KEY,
+    ['https://www.googleapis.com/auth/calendar']
+);
+
+// Create a new calendar instance
+const calendar = google.calendar({ version: 'v3', auth: jwtClient });
 
 // Function to add an event to Google Calendar
-async function addEventToCalendar(eventDetails) {
-    // Set up JWT authentication
-    const jwtClient = new google.auth.JWT(
-        process.env.GOOGLE_USER,
-        null,
-        process.env.GOOGLE_KEY,
-        ['https://www.googleapis.com/auth/calendar']
-    );
-
-    // Create a new calendar instance
-    const calendar = google.calendar({ version: 'v3', auth: jwtClient });
-    
+const addEventToCalendar = (eventDetails, calendar) => {
     // const eventDetails = {
     //     summary: 'Test Event',
     //     colorId: '3',
@@ -41,4 +40,4 @@ async function addEventToCalendar(eventDetails) {
     }
 }
 
-module.exports = { addEventToCalendar }
+module.exports = { addEventToCalendar, calendar }
