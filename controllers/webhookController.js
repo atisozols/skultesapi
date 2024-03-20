@@ -22,6 +22,8 @@ const handleWebhook = async (req, res) => {
         const checkoutSessionAsyncPaymentFailed = event.data.object;
         console.log('Session', checkoutSessionAsyncPaymentFailed.id, 'async payment failed')
         break;
+
+        // CHECKOUT.SESSION.ASYNC_PAYMENT_SUCCEEDED
         case 'checkout.session.async_payment_succeeded':
         const checkoutSessionAsyncPaymentSucceeded = event.data.object;
         console.log('Session', checkoutSessionAsyncPaymentSucceeded.id, 'async payment succeeded')
@@ -37,46 +39,19 @@ const handleWebhook = async (req, res) => {
                     colorId: '3',
                     description: appointment.phone,
                     start: {
-                        dateTime: appointment.date.slice(0,10) + 'T' + appointment.start.time + ':00',
+                        dateTime: appointment.date.toISOString().slice(0,10) + 'T' + appointment.range.start.time + ':00',
                         timeZone: 'Europe/Riga'
                     },
                     end: {
-                        dateTime: appointment.date.slice(0,10) + 'T' + appointment.end.time + ':00',
+                        dateTime: appointment.date.toISOString().slice(0,10) + 'T' + appointment.range.end.time + ':00',
                         timeZone: 'Europe/Riga'
                     }
                 };
-
-                console.log("details", eventDetails)
-
-                eventController.addEventToCalendar(eventDetails, eventController.calendar).then(() => {
-                    console.log("Event created for " + appointment.name)
-                });
+    
+                eventController.addEventToCalendar(eventDetails, eventController.calendar);
+                console.log("Event created for " + appointment.name);
             }
 
-            // Appointment.find({ checkout: checkoutSessionAsyncPaymentSucceeded.id }).then((events) => {
-            //     console.log("found:", events);
-            //     events.forEach( appointment => {
-            //         const eventDetails = {
-            //             summary: appointment.name,
-            //             colorId: '3',
-            //             description: appointment.phone,
-            //             start: {
-            //                 dateTime: appointment.date.slice(0,10) + 'T' + appointment.start.time + ':00',
-            //                 timeZone: 'Europe/Riga'
-            //             },
-            //             end: {
-            //                 dateTime: appointment.date.slice(0,10) + 'T' + appointment.end.time + ':00',
-            //                 timeZone: 'Europe/Riga'
-            //             }
-            //         };
-    
-            //         console.log("details", eventDetails)
-    
-            //         eventController.addEventToCalendar(eventDetails, eventController.calendar).then(() => {
-            //             console.log("Event created for " + appointment.name)
-            //         });
-            //     })
-            // })
 
             
             if (result.modifiedCount === 0) {
@@ -88,6 +63,8 @@ const handleWebhook = async (req, res) => {
             console.error("Error updating appointments:", error);
         }
         break;
+
+        // CHECKOUT.SESSION.COMPLETED
         case 'checkout.session.completed':
         const checkoutSessionCompleted = event.data.object;
         console.log('Session', checkoutSessionCompleted.id, 'completed')
@@ -96,12 +73,31 @@ const handleWebhook = async (req, res) => {
                 { checkout: checkoutSessionCompleted.id },
                 { $set: { status: 'paid' } }
             );
+
+            for await (const appointment of Appointment.find({ checkout: checkoutSessionCompleted.id })) {
+                const eventDetails = {
+                    summary: appointment.name,
+                    colorId: '3',
+                    description: appointment.phone,
+                    start: {
+                        dateTime: appointment.date.toISOString().slice(0,10) + 'T' + appointment.range.start.time + ':00',
+                        timeZone: 'Europe/Riga'
+                    },
+                    end: {
+                        dateTime: appointment.date.toISOString().slice(0,10) + 'T' + appointment.range.end.time + ':00',
+                        timeZone: 'Europe/Riga'
+                    }
+                };
     
-            if (result.nModified === 0) {
+                eventController.addEventToCalendar(eventDetails, eventController.calendar);
+                console.log("Event created for " + appointment.name);
+            }
+    
+            if (result.modifiedCount === 0) {
                 console.error("No appointments found for the given ID" );
             }
     
-            console.log(`${result.nModified} appointments updated successfully`);
+            console.log(`${result.modifiedCount} appointments updated successfully`);
         } catch (error) {
             console.error("Error updating appointments:", error);
         }
