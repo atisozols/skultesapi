@@ -24,6 +24,8 @@ const createCheckout = async (req, res) => {
             mode: 'payment',
             success_url: process.env.HOST_URL + "/#/success?session_id={CHECKOUT_SESSION_ID}",
             cancel_url: process.env.HOST_URL,
+            expires_at: new Date().getTime() + (30 * 60 * 1000),
+            allow_promotion_codes: true
         });
 
         const appointments = req.body.map( appointment => {
