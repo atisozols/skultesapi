@@ -12,20 +12,20 @@ const jwtClient = new google.auth.JWT(
 const calendar = google.calendar({ version: 'v3', auth: jwtClient });
 
 // Function to add an event to Google Calendar
-const addEventToCalendar = (eventDetails, calendar) => {
-    // const eventDetails = {
-    //     summary: 'Test Event',
-    //     colorId: '3',
-    //     description: 'This is a test event',
-    //     start: {
-    //         dateTime: '2024-03-20T10:00:00',
-    //         timeZone: 'Europe/Riga'
-    //     },
-    //     end: {
-    //         dateTime: '2024-03-20T12:00:00',
-    //         timeZone: 'Europe/Riga'
-    //     }
-    // };
+const addEventToCalendar = (appointment, calendar) => {
+    const eventDetails = {
+        summary: appointment.name,
+        colorId: '3',
+        description: appointment.phone,
+        start: {
+            dateTime: appointment.date.toISOString().slice(0,10) + 'T' + appointment.range.start.time + ':00',
+            timeZone: 'Europe/Riga'
+        },
+        end: {
+            dateTime: appointment.date.toISOString().slice(0,10) + 'T' + appointment.range.end.time + ':00',
+            timeZone: 'Europe/Riga'
+        }
+    };
 
     try {
         const response = calendar.events.insert({

@@ -7,7 +7,6 @@ const handleWebhook = async (req, res) => {
 
     let event;
     const key = process.env.PAYMENT_SIGNATURE
-    if(key) console.log('key exists')
 
     try {
         event = stripe.webhooks.constructEvent(req.body, sig, key);
@@ -18,9 +17,23 @@ const handleWebhook = async (req, res) => {
 
     // Handle the event
     switch (event.type) {
+        // CHECKOUT.SESSION.ASYNC_PAYMENT_FAILED
         case 'checkout.session.async_payment_failed':
         const checkoutSessionAsyncPaymentFailed = event.data.object;
         console.log('Session', checkoutSessionAsyncPaymentFailed.id, 'async payment failed')
+
+        try{
+            const result = await Appointment.deleteMany(
+                { checkout: checkoutSessionAsyncPaymentFailed.id, status: 'cart' }
+            );
+
+            console.log(`${result.deletedCount} deleted`)
+
+        }
+        catch(error){
+            console.error("Error deleting appointments:", error);
+        }
+
         break;
 
         // CHECKOUT.SESSION.ASYNC_PAYMENT_SUCCEEDED
@@ -34,21 +47,7 @@ const handleWebhook = async (req, res) => {
             );
 
             for await (const appointment of Appointment.find({ checkout: checkoutSessionAsyncPaymentSucceeded.id })) {
-                const eventDetails = {
-                    summary: appointment.name,
-                    colorId: '3',
-                    description: appointment.phone,
-                    start: {
-                        dateTime: appointment.date.toISOString().slice(0,10) + 'T' + appointment.range.start.time + ':00',
-                        timeZone: 'Europe/Riga'
-                    },
-                    end: {
-                        dateTime: appointment.date.toISOString().slice(0,10) + 'T' + appointment.range.end.time + ':00',
-                        timeZone: 'Europe/Riga'
-                    }
-                };
-    
-                eventController.addEventToCalendar(eventDetails, eventController.calendar);
+                eventController.addEventToCalendar(appointment, eventController.calendar);
                 console.log("Event created for " + appointment.name);
             }
 
@@ -58,7 +57,7 @@ const handleWebhook = async (req, res) => {
                 console.error("No appointments found for the given ID" );
             }
     
-            console.log(`${result.modifiedCount} appointments updated successfully`);
+            console.log(`${result.modifiedCount} updated to status: paid`);
         } catch (error) {
             console.error("Error updating appointments:", error);
         }
@@ -74,22 +73,8 @@ const handleWebhook = async (req, res) => {
                 { $set: { status: 'paid' } }
             );
 
-            for await (const appointment of Appointment.find({ checkout: checkoutSessionCompleted.id })) {
-                const eventDetails = {
-                    summary: appointment.name,
-                    colorId: '3',
-                    description: appointment.phone,
-                    start: {
-                        dateTime: appointment.date.toISOString().slice(0,10) + 'T' + appointment.range.start.time + ':00',
-                        timeZone: 'Europe/Riga'
-                    },
-                    end: {
-                        dateTime: appointment.date.toISOString().slice(0,10) + 'T' + appointment.range.end.time + ':00',
-                        timeZone: 'Europe/Riga'
-                    }
-                };
-    
-                eventController.addEventToCalendar(eventDetails, eventController.calendar);
+            for await (const appointment of Appointment.find({ checkout: checkoutSessionAsyncPaymentSucceeded.id })) {
+                eventController.addEventToCalendar(appointment, eventController.calendar);
                 console.log("Event created for " + appointment.name);
             }
     
@@ -97,7 +82,7 @@ const handleWebhook = async (req, res) => {
                 console.error("No appointments found for the given ID" );
             }
     
-            console.log(`${result.modifiedCount} appointments updated successfully`);
+            console.log(`${result.modifiedCount} updated to status: paid`);
         } catch (error) {
             console.error("Error updating appointments:", error);
         }
@@ -106,7 +91,20 @@ const handleWebhook = async (req, res) => {
         case 'checkout.session.expired':
         const checkoutSessionExpired = event.data.object;
         console.log('Session', checkoutSessionExpired.id, 'expired')
-        // Then define and call a function to handle the event checkout.session.expired
+        try{
+            const result = await Appointment.deleteMany(
+                { checkout: checkoutSessionExpired.id, status: 'cart' }
+            );
+
+            console.log(`${result.deletedCount} deleted`)
+
+        }
+        catch(error){
+            console.error("Error deleting appointments:", error);
+        }
+        
+
+
         break;
         // ... handle other event types
         default:
