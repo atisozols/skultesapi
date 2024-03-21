@@ -1,7 +1,6 @@
 const allowedOrigins = [
-    "https://skultesgym.onrender.com",
-    'https://skultesgym.lv',
-    'https://skultes.cyclic.app',
+    "https://skultesapi.onrender.com",
+    'https://dev.skultesgym.lv',
     'http://127.0.0.1:5000',
     'http://localhost:5000',
     'http://localhost:8080'
