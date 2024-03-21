@@ -73,7 +73,7 @@ const handleWebhook = async (req, res) => {
                 { $set: { status: 'paid' } }
             );
 
-            for await (const appointment of Appointment.find({ checkout: checkoutSessionAsyncPaymentSucceeded.id })) {
+            for await (const appointment of Appointment.find({ checkout: checkoutSessionCompleted.id })) {
                 eventController.addEventToCalendar(appointment, eventController.calendar);
                 console.log("Event created for " + appointment.name);
             }
