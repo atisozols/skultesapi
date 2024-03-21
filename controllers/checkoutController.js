@@ -19,11 +19,16 @@ const createCheckout = async (req, res) => {
             });
         });
 
+        const currentTime = new Date().getTime();
+        const thirtyMinutesFromNow = currentTime + (30 * 60 * 1000);
+
         const session = await stripe.checkout.sessions.create({
             line_items: lineItems,
             mode: 'payment',
             success_url: process.env.HOST_URL + "/#/success?session_id={CHECKOUT_SESSION_ID}",
             cancel_url: process.env.HOST_URL,
+            expires_at: Math.floor(thirtyMinutesFromNow / 1000),
+            allow_promotion_codes: true
         });
 
         const appointments = req.body.map( appointment => {
