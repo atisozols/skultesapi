@@ -67,8 +67,9 @@ const createAppointmentMiddleware = async (req, res, next) => {
 
     // Process appointments asynchronously
     const results = await Promise.all(conflictingAppointments);
+
     const conflictingTimeslots = results.map(appointment => {
-      return `${timeslots[appointment.start_index]}-${timeslots[appointment.end_index]}`
+      return `${appointment.range.start.time}-${appointment.range.end.time}`
     });
     console.log(conflictingTimeslots)
 
