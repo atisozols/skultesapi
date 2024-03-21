@@ -68,15 +68,17 @@ const createAppointmentMiddleware = async (req, res, next) => {
     // Process appointments asynchronously
     const results = await Promise.all(conflictingAppointments);
 
-    // const conflictingTimeslots = results.map(appointment => {
-    //   return `${appointment.range.start.time}-${appointment.range.end.time}`
-    // });
+    const conflictingTimeslots = results.map(appointments => {
+      for(const appointment of appointments){
+        return `${appointment.range.start.time}-${appointment.range.end.time}`
+      }
+    });
     // console.log(conflictingTimeslots)
 
     // Check if any results indicate overlapping appointments
     const hasOverlap = results.some(appointments => appointments.length > 0);
     if (hasOverlap) {
-      return res.status(409).send({msg: "Kāds no izvēlētajiem laikiem jau ticis rezervēts vai šobrīd tiek apstrādāts", conflicts: results});
+      return res.status(409).send({msg: "Kāds no izvēlētajiem laikiem jau ticis rezervēts vai šobrīd tiek apstrādāts", conflicts: conflictingTimeslots});
     }
 
     // Move to the next middleware/route handler
