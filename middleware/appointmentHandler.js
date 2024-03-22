@@ -1,94 +1,88 @@
-const Appointment = require('../model/Appointment');
 const moment = require('moment');
-const pricing = require('../config/pricing')
-const timeslots = require('../config/timeslots')
+const Appointment = require('../model/Appointment');
+const pricing = require('../config/pricing');
+const timeslots = require('../config/timeslots');
 
 const createAppointmentMiddleware = async (req, res, next) => {
+  const cart = [];
+  try {
+    const conflictingAppointments = req.body.map((appointment) => {
+      // Check pricing availability based on start and end range
+      const startRange = appointment.start_index;
+      const endRange = appointment.end_index;
+      const selectedPricing = startRange > 30 ? pricing.standard : pricing.morning;
+      const price = selectedPricing[endRange - startRange];
 
-    const cart = []
-    try {
-        const conflictingAppointments = req.body.map(appointment => {
-          // Check pricing availability based on start and end range
-          const startRange = appointment.start_index
-          const endRange = appointment.end_index
-          const selectedPricing =  startRange > 30 ? pricing.standard : pricing.morning;
-          const price = selectedPricing[endRange - startRange];
+      if (!price) {
+        return res.status(400).send({ msg: 'Bad request: No pricing available for this timeslot range!' });
+      }
 
-          if (!price) {
-          return res.status(400).send({ msg: "Bad request: No pricing available for this timeslot range!" });
-          }
+      cart.push({
+        name: appointment.name,
+        phone: appointment.phone,
+        date: appointment.date,
+        range: {
+          start: {
+            index: appointment.start_index,
+            time: timeslots[appointment.start_index],
+          },
+          end: {
+            index: appointment.end_index,
+            time: timeslots[appointment.end_index],
+          },
+        },
+        price: price * 100,
+      });
+      // Check for overlapping appointments
+      const inputStart = moment(appointment.date).startOf('day').toDate();
+      const inputEnd = moment(appointment.date).endOf('day').toDate();
 
-          cart.push({
-            name: appointment.name,
-            phone: appointment.phone,
-            date: appointment.date,
-            range:{
-                start:{
-                    index: appointment.start_index,
-                    time: timeslots[appointment.start_index]
-                },
-                end:{
-                    index: appointment.end_index,
-                    time: timeslots[appointment.end_index]
-                }
-            },
-            price: price * 100
-          })
-          // Check for overlapping appointments
-          const inputStart = moment(appointment.date).startOf('day').toDate();
-          const inputEnd = moment(appointment.date).endOf('day').toDate();
-
-          return Appointment.find({
-            date: {
-                $gte: inputStart,
-                $lte: inputEnd
-            },
-            $or: [
-                {
-                  'range.start.index': { $lt: endRange },
-                  'range.end.index': { $gt: startRange }
-                },
-                {
-                  $and: [
-                    { 'range.start.index': { $gte: startRange, $lt: endRange } },
-                    { 'range.end.index': { $gt: endRange } }
-                  ]
-                },
-                {
-                  $and: [
-                    { 'range.start.index': { $lt: startRange } },
-                    { 'range.end.index': { $lte: endRange, $gt: startRange } }
-                  ]
-                }
-            ]
-          });
+      return Appointment.find({
+        date: {
+          $gte: inputStart,
+          $lte: inputEnd,
+        },
+        $or: [
+          {
+            'range.start.index': { $lt: endRange },
+            'range.end.index': { $gt: startRange },
+          },
+          {
+            $and: [
+              { 'range.start.index': { $gte: startRange, $lt: endRange } },
+              { 'range.end.index': { $gt: endRange } },
+            ],
+          },
+          {
+            $and: [
+              { 'range.start.index': { $lt: startRange } },
+              { 'range.end.index': { $lte: endRange, $gt: startRange } },
+            ],
+          },
+        ],
+      });
     });
-
 
     // Process appointments asynchronously
     const results = await Promise.all(conflictingAppointments);
 
-    const conflictingTimeslots = results.map(appointments => {
-      for(const appointment of appointments){
-        return `${appointment.range.start.time}-${appointment.range.end.time}`
-      }
-    });
+    const conflictingTimeslots = results.flatMap((appointments) => appointments.map((appointment) => `${appointment.range.start.time}-${appointment.range.end.time}`));
 
     const uniqueConflictingTimeslots = [...new Set(conflictingTimeslots)];
 
     // Check if any results indicate overlapping appointments
-    const hasOverlap = results.some(appointments => appointments.length > 0);
+    const hasOverlap = results.some((appointments) => appointments.length > 0);
     if (hasOverlap) {
-      return res.status(409).send({msg: "Kāds no izvēlētajiem laikiem jau ticis rezervēts vai šobrīd tiek apstrādāts", conflicts: uniqueConflictingTimeslots});
+      return res.status(409).send({ msg: 'Kāds no izvēlētajiem laikiem jau ticis rezervēts vai šobrīd tiek apstrādāts', conflicts: uniqueConflictingTimeslots });
     }
 
     // Move to the next middleware/route handler
-    req.body = cart
+    req.body = cart;
     next();
-
+    return cart;
   } catch (error) {
     console.error(error);
-    res.status(500).send({ msg: "Internal server error" });
+    return res.status(500).send({ msg: 'Internal server error' });
   }
 };
 
