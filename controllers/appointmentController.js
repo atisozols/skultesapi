@@ -22,7 +22,7 @@ const getAvailability = async (req, res) => {
       },
       {
         $group: {
-          id: {
+          _id: {
             year: { $year: '$date' },
             month: { $month: '$date' },
             day: { $dayOfMonth: '$date' },
@@ -35,7 +35,8 @@ const getAvailability = async (req, res) => {
     // Merge availability data with the whole week's dates
     const availability = weekDates.map((date) => {
       const foundAvailability = unavailableRanges.find((avail) => {
-        const { year, month, day } = avail.id;
+        // eslint-disable-next-line no-underscore-dangle
+        const { year, month, day } = avail._id;
         const availDate = new Date(year, month - 1, day);
         return moment(date).isSame(availDate, 'day');
       });

@@ -25,8 +25,8 @@ const createCheckout = async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${process.env.HOST_URL}/#/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: process.env.HOST_URL,
+      success_url: `${process.env.FRONT_URL}/#/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: process.env.FRONT_URL,
       expires_at: Math.floor(thirtyMinutesFromNow / 1000),
       allow_promotion_codes: true,
     });
