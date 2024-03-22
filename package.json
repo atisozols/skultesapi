@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node index",
-    "dev": "nodemon index"
+    "dev": "nodemon index",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "author": "",
   "license": "ISC",
@@ -19,6 +21,12 @@
     "stripe": "^14.5.0"
   },
   "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-node": "^11.1.0",
     "nodemon": "^3.0.1"
+  },
+  "engines":{
+    "node": ">=20.7.0"
   }
 }

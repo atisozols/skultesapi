@@ -1,7 +1,7 @@
-const pricing = require('../config/pricing')
+const pricing = require('../config/pricing');
 
 const getPricing = (req, res) => {
-    res.send(pricing)
-}
+  res.send(pricing);
+};
 
-module.exports = { getPricing }
+module.exports = { getPricing };
