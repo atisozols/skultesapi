@@ -50,7 +50,7 @@ const handleWebhook = async (req, res) => {
         });
 
         appointments.forEach(async (appointment) => {
-          await eventController.addEventToCalendar(appointment, eventController.calendar);
+          await eventController.addEventToCalendar(appointment, eventController.calendarInstance);
           console.log(`Event created for ${appointment.name}`);
         });
 
@@ -78,7 +78,7 @@ const handleWebhook = async (req, res) => {
         const appointments = await Appointment.find({ checkout: checkoutSessionCompleted.id });
 
         appointments.forEach(async (appointment) => {
-          await eventController.addEventToCalendar(appointment, eventController.calendar);
+          await eventController.addEventToCalendar(appointment, eventController.calendarInstance);
           console.log(`Event created for ${appointment.name}`);
         });
 
