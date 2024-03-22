@@ -5,7 +5,6 @@ require('dotenv').config()
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
-const path = __dirname + '/views/'
 const cors = require('cors');
 const corsOptions = require('./config/corsOptions');
 const PORT = process.env.PORT || 5000;
@@ -65,7 +64,6 @@ app.use('/webhook', require('./routes/api/webhook'))
 // });
 
 app.use(cors(corsOptions))
-app.use(express.static(path))
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -74,10 +72,6 @@ app.use('/api/checkout/', require('./routes/api/checkout'))
 app.use('/api/pricing/', require('./routes/api/pricing'))
 
 app.use('/api/availability/', require('./routes/api/appointments'))
-
-app.get('/', (req, res) => {
-    res.sendFile(path + 'index.html')
-})
 
 mongoose.connection.once('open', () => {
     console.log('Connected to MongoDB')
