@@ -3,7 +3,7 @@ const Appointment = require('../model/Appointment');
 
 const getAvailability = async (req, res) => {
   try {
-    const currentDay = moment().utcOffset(0, true).add(2, 'hours').startOf('day');
+    const currentDay = moment().utcOffset(0, true).startOf('day');
 
     // Generate an array of dates for the whole week
     const weekDates = [];

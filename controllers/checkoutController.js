@@ -1,5 +1,6 @@
 require('dotenv').config();
 const stripe = require('stripe')(process.env.STRIPE_KEY);
+const moment = require('moment');
 const Appointment = require('../model/Appointment');
 
 const createCheckout = async (req, res) => {
@@ -25,7 +26,7 @@ const createCheckout = async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${process.env.FRONT_URL}/#/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.FRONT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: process.env.FRONT_URL,
       expires_at: Math.floor(thirtyMinutesFromNow / 1000),
       allow_promotion_codes: true,
@@ -48,8 +49,19 @@ const createCheckout = async (req, res) => {
 const getCheckoutSession = async (req, res) => {
   try {
     console.log('Getting session', req.params.id);
+
     const session = await stripe.checkout.sessions.retrieve(req.params.id);
-    res.send({ payment_status: session.payment_status });
+    const appointments = await Appointment.find({
+      checkout: req.params.id,
+    });
+
+    const appointmentData = appointments.map((appointment) => ({
+      date: moment(appointment.date).format('DD.MM.YYYY'),
+      start: appointment.range.start.time,
+      end: appointment.range.end.time,
+    }));
+
+    res.send({ payment_status: session.payment_status, payment_data: appointmentData });
   } catch (error) {
     res.status(400).send({ msg: error.message });
   }
