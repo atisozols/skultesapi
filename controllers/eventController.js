@@ -12,7 +12,7 @@ const jwtClient = new google.auth.JWT(
 const calendarInstance = google.calendar({ version: 'v3', auth: jwtClient });
 
 // Function to add an event to Google Calendar
-const addEventToCalendar = (appointment, calendar, attendee) => {
+const addEventToCalendar = (appointment, calendar) => {
   const eventDetails = {
     // eslint-disable-next-line no-underscore-dangle
     id: appointment._id,
