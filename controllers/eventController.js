@@ -12,8 +12,7 @@ const jwtClient = new google.auth.JWT(
 const calendarInstance = google.calendar({ version: 'v3', auth: jwtClient });
 
 // Function to add an event to Google Calendar
-const addEventToCalendar = (appointment, calendar, atendee) => {
-  console.log('atendee: ', atendee);
+const addEventToCalendar = (appointment, calendar, attendee) => {
   const eventDetails = {
     // eslint-disable-next-line no-underscore-dangle
     id: appointment._id,
@@ -28,10 +27,10 @@ const addEventToCalendar = (appointment, calendar, atendee) => {
       dateTime: `${appointment.date.toISOString().slice(0, 10)}T${appointment.range.end.time}:00`,
       timeZone: 'Europe/Riga',
     },
-    atendees: [],
+    attendees: [],
   };
 
-  if (atendee) eventDetails.atendees.push({ email: atendee });
+  if (attendee) eventDetails.attendees.push({ email: attendee });
   console.log('EVENT_details: ', eventDetails);
 
   try {
