@@ -32,12 +32,15 @@ const addEventToCalendar = (appointment, calendar, atendee) => {
   };
 
   if (atendee) eventDetails.atendees.push({ email: atendee });
+  console.log(eventDetails);
 
   try {
     const response = calendar.events.insert({
       calendarId: 'c4298fa15b1f42cc44bc7e3f834ab046f6ede03a346d67db5c2ae6f063293092@group.calendar.google.com',
       resource: eventDetails,
     });
+
+    console.log(response.htmlLink);
 
     return response.data;
   } catch (error) {
