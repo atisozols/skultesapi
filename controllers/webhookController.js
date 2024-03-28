@@ -74,6 +74,7 @@ const handleWebhook = async (req, res) => {
     // CHECKOUT.SESSION.COMPLETED
     case 'checkout.session.completed': {
       const checkoutSessionCompleted = event.data.object;
+      console.log(checkoutSessionCompleted);
       console.log('Session', checkoutSessionCompleted.id, 'completed');
       try {
         const result = await Appointment.updateMany(
