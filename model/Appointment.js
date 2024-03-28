@@ -50,7 +50,6 @@ const appointmentSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-  // event: String,
 });
 
 module.exports = mongoose.model('Appointment', appointmentSchema);

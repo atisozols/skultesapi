@@ -49,8 +49,14 @@ const handleWebhook = async (req, res) => {
           checkout: checkoutSessionAsyncPaymentSucceeded.id,
         });
 
+        const atendeeEmail = checkoutSessionAsyncPaymentSucceeded.customer_email;
+
         appointments.forEach(async (appointment) => {
-          await eventController.addEventToCalendar(appointment, eventController.calendarInstance);
+          await eventController.addEventToCalendar(
+            appointment,
+            eventController.calendarInstance,
+            atendeeEmail,
+          );
           console.log(`Event created for ${appointment.name}`);
         });
 
@@ -77,8 +83,14 @@ const handleWebhook = async (req, res) => {
 
         const appointments = await Appointment.find({ checkout: checkoutSessionCompleted.id });
 
+        const atendeeEmail = checkoutSessionCompleted.customer_email;
+
         appointments.forEach(async (appointment) => {
-          await eventController.addEventToCalendar(appointment, eventController.calendarInstance);
+          await eventController.addEventToCalendar(
+            appointment,
+            eventController.calendarInstance,
+            atendeeEmail,
+          );
           console.log(`Event created for ${appointment.name}`);
         });
 
