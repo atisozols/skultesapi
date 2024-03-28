@@ -87,11 +87,12 @@ const handleWebhook = async (req, res) => {
         // || checkoutSessionCompleted.customer_details.email;
 
         appointments.forEach(async (appointment) => {
-          await eventController.addEventToCalendar(
+          const calEvent = await eventController.addEventToCalendar(
             appointment,
             eventController.calendarInstance,
           );
           console.log(`Event created for ${appointment.name}`);
+          console.log(calEvent);
         });
 
         if (result.modifiedCount === 0) {
