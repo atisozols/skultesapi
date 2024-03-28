@@ -13,6 +13,7 @@ const calendarInstance = google.calendar({ version: 'v3', auth: jwtClient });
 
 // Function to add an event to Google Calendar
 const addEventToCalendar = (appointment, calendar, atendee) => {
+  console.log('atendee: ', atendee);
   const eventDetails = {
     // eslint-disable-next-line no-underscore-dangle
     id: appointment._id,
@@ -30,7 +31,7 @@ const addEventToCalendar = (appointment, calendar, atendee) => {
     atendees: [],
   };
 
-  if (atendee) eventDetails.atendees.push(atendee);
+  if (atendee) eventDetails.atendees.push({ email: atendee });
 
   try {
     const response = calendar.events.insert({
