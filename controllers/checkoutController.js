@@ -55,11 +55,27 @@ const getCheckoutSession = async (req, res) => {
       checkout: req.params.id,
     });
 
-    const appointmentData = appointments.map((appointment) => ({
-      date: moment(appointment.date).format('DD.MM.YYYY'),
-      start: appointment.range.start.time,
-      end: appointment.range.end.time,
-    }));
+    const appointmentData = appointments.map((appointment) => {
+      const calendarUrl = `data:text/calendar;charset=utf8,${encodeURIComponent(
+        'BEGIN:VCALENDAR\r\n'
+        + 'VERSION:2.0\r\n'
+        + 'BEGIN:VEVENT\r\n'
+        + 'SUMMARY:Skultes Gym apmeklējums\r\n'
+        + `DESCRIPTION:${appointment.name}\r\n`
+        + 'LOCATION:Skultes, Tumes pagasts\r\n'
+        + `DTSTART:${appointment.date.toISOString().slice(0, 10)}T${appointment.range.start.time}:00\r\n`
+        + `DTEND:${appointment.date.toISOString().slice(0, 10)}T${appointment.range.end.time}:00\r\n`
+        + 'END:VEVENT\r\n'
+        + 'END:VCALENDAR\r\n',
+      )}`;
+
+      return {
+        date: moment(appointment.date).format('DD.MM.YYYY'),
+        start: appointment.range.start.time,
+        end: appointment.range.end.time,
+        add_to_calendar: calendarUrl,
+      };
+    });
 
     res.send({ payment_status: session.payment_status, payment_data: appointmentData });
   } catch (error) {
