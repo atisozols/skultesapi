@@ -56,18 +56,7 @@ const getCheckoutSession = async (req, res) => {
     });
 
     const appointmentData = appointments.map((appointment) => {
-      const calendarUrl = `data:text/calendar;charset=utf8,${encodeURIComponent(
-        'BEGIN:VCALENDAR\r\n'
-        + 'VERSION:2.0\r\n'
-        + 'BEGIN:VEVENT\r\n'
-        + 'SUMMARY:Skultes Gym apmeklējums\r\n'
-        + `DESCRIPTION:${appointment.name}\r\n`
-        + 'LOCATION:Skultes, Tumes pagasts\r\n'
-        + `DTSTART:${appointment.date.toISOString().slice(0, 10)}T${appointment.range.start.time}:00\r\n`
-        + `DTEND:${appointment.date.toISOString().slice(0, 10)}T${appointment.range.end.time}:00\r\n`
-        + 'END:VEVENT\r\n'
-        + 'END:VCALENDAR\r\n',
-      )}`;
+      const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Skultes Gym apmeklējums')}&location=${encodeURIComponent('Skultes, Tumes pagasts')}&dates=${encodeURIComponent(appointment.date.toISOString().slice(0, 10).replaceAll('-', ''))}T${encodeURIComponent(appointment.range.start.time.replace(':', ''))}00/${encodeURIComponent(appointment.date.toISOString().slice(0, 10).replaceAll('-', ''))}T${encodeURIComponent(appointment.range.end.time.replace(':', ''))}00`;
 
       return {
         date: moment(appointment.date).format('DD.MM.YYYY'),
