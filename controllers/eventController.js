@@ -35,7 +35,7 @@ const addEventToCalendar = (appointment, calendar) => {
       resource: eventDetails,
     });
 
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error adding event: ', error);
     throw error;
