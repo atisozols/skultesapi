@@ -32,7 +32,7 @@ const addEventToCalendar = (appointment, calendar, atendee) => {
   };
 
   if (atendee) eventDetails.atendees.push({ email: atendee });
-  console.log(eventDetails);
+  console.log('EVENT_details: ', eventDetails);
 
   try {
     const response = calendar.events.insert({
@@ -40,7 +40,7 @@ const addEventToCalendar = (appointment, calendar, atendee) => {
       resource: eventDetails,
     });
 
-    console.log(response.htmlLink);
+    console.log('RESPONSE_data: ', response.data);
 
     return response.data;
   } catch (error) {
