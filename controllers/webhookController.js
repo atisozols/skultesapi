@@ -49,7 +49,8 @@ const handleWebhook = async (req, res) => {
           checkout: checkoutSessionAsyncPaymentSucceeded.id,
         });
 
-        const atendeeEmail = checkoutSessionAsyncPaymentSucceeded.customer_email;
+        const atendeeEmail = checkoutSessionAsyncPaymentSucceeded.customer_email
+        || checkoutSessionAsyncPaymentSucceeded.customer_details.email;
 
         appointments.forEach(async (appointment) => {
           await eventController.addEventToCalendar(
@@ -84,7 +85,8 @@ const handleWebhook = async (req, res) => {
 
         const appointments = await Appointment.find({ checkout: checkoutSessionCompleted.id });
 
-        const atendeeEmail = checkoutSessionCompleted.customer_email;
+        const atendeeEmail = checkoutSessionCompleted.customer_email
+        || checkoutSessionCompleted.customer_details.email;
 
         appointments.forEach(async (appointment) => {
           await eventController.addEventToCalendar(
