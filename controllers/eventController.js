@@ -27,11 +27,7 @@ const addEventToCalendar = (appointment, calendar, attendee) => {
       dateTime: `${appointment.date.toISOString().slice(0, 10)}T${appointment.range.end.time}:00`,
       timeZone: 'Europe/Riga',
     },
-    attendees: [],
   };
-
-  if (attendee) eventDetails.attendees.push({ email: attendee });
-  console.log('EVENT_details: ', eventDetails);
 
   try {
     const response = calendar.events.insert({
@@ -39,7 +35,7 @@ const addEventToCalendar = (appointment, calendar, attendee) => {
       resource: eventDetails,
     });
 
-    console.log('RESPONSE_data: ', response.data);
+    console.log('RESPONSE_body: ', response.body);
 
     return response.data;
   } catch (error) {
