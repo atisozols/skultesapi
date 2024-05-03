@@ -16,7 +16,7 @@ const createCheckout = async (req, res) => {
         currency: 'eur',
         product_data: {
           name: 'Skultes Gym abonements',
-          description: `${req.body.count} apmeklējum${req.body.count < 2 ? 's' : 'i'} Termiņš: ${moment().add(2, 'months').format('DD.MM.YYYY')}`,
+          description: `${req.body.count} apmeklējum${req.body.count < 2 ? 's' : 'i'}, derīgs līdz ${moment().add(1, 'months').format('DD.MM.YYYY')}`,
         },
         unit_amount: pricing[req.body.count],
       },

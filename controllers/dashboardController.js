@@ -73,7 +73,8 @@ const deleteAppointemnt = async (req, res) => {
         .del();
 
       const today = new Date().toDateString();
-      const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+      const fifteenMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      console.log(`created at ${deletableAppointment.created_at}, 15mins ago the timestamp was ${fifteenMinutesAgo}`);
 
       // Increment the user's subscription balance if the dates are different
       if (today !== appointmentDate && deletableAppointment.created_at >= fifteenMinutesAgo) {
@@ -97,6 +98,14 @@ const addAppointments = async (req, res) => {
     if (!req.auth.sessionId) res.status(403).send({ message: 'Unauthenticated' });
     const { userId } = req.auth;
     const appointments = req.body;
+
+    const userSubscription = await knexInstance('subscriptions')
+      .where('user_id', userId)
+      .first();
+
+    if (!userSubscription || new Date(userSubscription.expiry_date) < new Date()) {
+      res.status(409).send({ message: 'Subscription expired', insufficient: true, overlap: false });
+    }
 
     await Promise.all(appointments.map(async (appointment) => {
       await knexInstance('appointments').insert({
