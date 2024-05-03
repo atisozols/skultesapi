@@ -77,7 +77,7 @@ const deleteAppointemnt = async (req, res) => {
       console.log(`created at ${deletableAppointment.created_at}, 15mins ago the timestamp was ${fifteenMinutesAgo}`);
 
       // Increment the user's subscription balance if the dates are different
-      if (today !== appointmentDate && deletableAppointment.created_at >= fifteenMinutesAgo) {
+      if (today !== appointmentDate || deletableAppointment.created_at >= fifteenMinutesAgo) {
         const incrementAmount = deletableAppointment.start_index < 35 ? 1 : 2;
         await trx('subscriptions')
           .where('user_id', user.id)
