@@ -11,6 +11,13 @@ const handlePaymentSuccessEvent = async (event) => {
     await knexInstance('subscriptions')
       .where('user_id', user)
       .increment('balance', count);
+
+    const expiryDate = new Date();
+    expiryDate.setMonth(expiryDate.getMonth() + 1);
+
+    await knexInstance('subscriptions')
+      .where('user_id', user)
+      .update('expiry_date', expiryDate);
   } catch (error) {
     console.error('Error updating subscription:', error);
   }
