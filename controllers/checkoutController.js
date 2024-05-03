@@ -18,7 +18,7 @@ const createCheckout = async (req, res) => {
           name: 'Skultes Gym abonements',
           description: `${req.body.count} apmeklējum${req.body.count < 2 ? 's' : 'i'} Termiņš: ${moment().add(2, 'months').format('DD.MM.YYYY')}`,
         },
-        unit_amount: pricing[req.body.count] * 100,
+        unit_amount: pricing[req.body.count],
       },
       quantity: 1,
     });
@@ -34,11 +34,12 @@ const createCheckout = async (req, res) => {
       expires_at: Math.floor(thirtyMinutesFromNow / 1000),
       allow_promotion_codes: true,
       metadata: {
-        user_id: userId,
+        user: userId,
+        count: req.body.count,
       },
     });
 
-    res.send({ url: session.url, session });
+    res.send({ url: session.url });
   } catch (error) {
     res.status(400).send({ message: error.message });
   }
