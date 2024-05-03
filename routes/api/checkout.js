@@ -1,11 +1,13 @@
 const express = require('express');
+const { ClerkExpressWithAuth } = require('@clerk/clerk-sdk-node');
 
 const router = express.Router();
 const checkoutController = require('../../controllers/checkoutController');
-const appointmentHandler = require('../../middleware/appointmentHandler');
 
 router.route('/')
-  .post(appointmentHandler.createAppointmentMiddleware, checkoutController.createCheckout);
+  .post(ClerkExpressWithAuth({
+    authorizedParties: process.env.ALLOWED_ORIGINS.split(','),
+  }), checkoutController.createCheckout);
 
 router.route('/:id')
   .get(checkoutController.getCheckoutSession);

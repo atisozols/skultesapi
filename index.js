@@ -11,11 +11,6 @@ const corsOptions = require('./config/corsOptions');
 
 const PORT = process.env.PORT || 5000;
 
-// MongoDB/mongoose
-const connectDB = require('./config/dbConnection');
-
-connectDB();
-
 app.use('/webhook', require('./routes/api/webhook'));
 
 app.use(cors(corsOptions));
@@ -26,9 +21,8 @@ app.use('/api/checkout/', require('./routes/api/checkout'));
 
 app.use('/api/pricing/', require('./routes/api/pricing'));
 
-app.use('/api/availability/', require('./routes/api/appointments'));
+app.use('/api/availability/', require('./routes/api/availability'));
 
-mongoose.connection.once('open', () => {
-  console.log('Connected to MongoDB');
-  app.listen(PORT, () => console.log(`Server running on ${PORT}`));
-});
+app.use('/api/dashboard/', require('./routes/api/dashboard'));
+
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));

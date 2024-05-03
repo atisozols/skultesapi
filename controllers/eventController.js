@@ -15,7 +15,7 @@ const calendarInstance = google.calendar({ version: 'v3', auth: jwtClient });
 const addEventToCalendar = (appointment, calendar) => {
   const eventDetails = {
     // eslint-disable-next-line no-underscore-dangle
-    id: appointment._id,
+    id: appointment.id,
     summary: appointment.name,
     colorId: '3',
     description: appointment.phone,
