@@ -10,11 +10,14 @@ const createAppointmentMiddleware = async (req, res, next) => {
       // Check pricing availability based on start and end range
       const startRange = appointment.start_index;
       const endRange = appointment.end_index;
-      const selectedPricing = startRange > 30 ? pricing.standard : pricing.morning;
+      const selectedPricing =
+        startRange > 30 ? pricing.standard : pricing.morning;
       const price = selectedPricing[endRange - startRange];
 
       if (!price) {
-        return res.status(400).send({ msg: 'Bad request: No pricing available for this timeslot range!' });
+        return res.status(400).send({
+          msg: 'Bad request: No pricing available for this timeslot range!',
+        });
       }
 
       cart.push({
@@ -42,6 +45,7 @@ const createAppointmentMiddleware = async (req, res, next) => {
           $gte: inputStart,
           $lte: inputEnd,
         },
+        status: 'paid' || 'cart',
         $or: [
           {
             'range.start.index': { $lt: endRange },
@@ -66,14 +70,22 @@ const createAppointmentMiddleware = async (req, res, next) => {
     // Process appointments asynchronously
     const results = await Promise.all(conflictingAppointments);
 
-    const conflictingTimeslots = results.flatMap((appointments) => appointments.map((appointment) => `${appointment.range.start.time}-${appointment.range.end.time}`));
+    const conflictingTimeslots = results.flatMap((appointments) =>
+      appointments.map(
+        (appointment) =>
+          `${appointment.range.start.time}-${appointment.range.end.time}`,
+      ),
+    );
 
     const uniqueConflictingTimeslots = [...new Set(conflictingTimeslots)];
 
     // Check if any results indicate overlapping appointments
     const hasOverlap = results.some((appointments) => appointments.length > 0);
     if (hasOverlap) {
-      return res.status(409).send({ msg: 'Kāds no izvēlētajiem laikiem jau ticis rezervēts vai šobrīd tiek apstrādāts', conflicts: uniqueConflictingTimeslots });
+      return res.status(409).send({
+        msg: 'Kāds no izvēlētajiem laikiem jau ticis rezervēts vai šobrīd tiek apstrādāts',
+        conflicts: uniqueConflictingTimeslots,
+      });
     }
 
     // Move to the next middleware/route handler

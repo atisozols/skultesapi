@@ -1,5 +1,9 @@
 const moment = require('moment-timezone');
 const Appointment = require('../model/Appointment');
+const eventController = require('./eventController');
+const isCancelledString = require('../utilities/cancelledStatusCheck');
+const isCancellable = require('../utilities/isCancellable');
+const stripe = require('stripe')(process.env.STRIPE_KEY);
 
 const getAvailability = async (req, res) => {
   try {
@@ -54,4 +58,74 @@ const getAvailability = async (req, res) => {
   }
 };
 
-module.exports = { getAvailability };
+const cancelAppointment = async (req, res) => {
+  try {
+    const { id } = req.body;
+    let response = {};
+    const appointment = await Appointment.findById(id);
+
+    if (isCancelledString(appointment.status)) {
+      response = {
+        message: 'Appointment already deleted',
+        coupon: appointment.status.split('-')[1],
+        price: appointment.price,
+      };
+    } else if (appointment.status !== 'paid') {
+      response = {
+        message: 'Appointment already cancelled or not yet paid for',
+        coupon: null,
+        price: null,
+      };
+    } else if (!isCancellable(appointment)) {
+      appointment.status = `cancelled`;
+      await appointment.save();
+
+      await eventController.removeEventFromCalendar(
+        appointment,
+        eventController.calendarInstance
+      );
+
+      response = {
+        message: 'Appointment deleted',
+        coupon: null,
+        price: null,
+      };
+    } else {
+      const coupon = await stripe.coupons.create({
+        amount_off: appointment.price,
+        currency: 'EUR',
+        duration: 'once',
+      });
+
+      const promotionCode = await stripe.promotionCodes.create({
+        coupon: coupon.id,
+        max_redemptions: 1,
+      });
+
+      appointment.status = `cancelled-${promotionCode.code}`;
+      await appointment.save();
+
+      await eventController.removeEventFromCalendar(
+        appointment,
+        eventController.calendarInstance
+      );
+
+      response = {
+        message: 'Appointment deleted',
+        coupon: promotionCode.code,
+        price: appointment.price,
+      };
+    }
+
+    res.status(200).send(response);
+  } catch (error) {
+    console.error(error);
+    res.status(400).send({
+      message: error.message,
+      coupon: null,
+      price: null,
+    });
+  }
+};
+
+module.exports = { getAvailability, cancelAppointment };

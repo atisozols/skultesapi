@@ -20,12 +20,17 @@ const handleWebhook = async (req, res) => {
     // CHECKOUT.SESSION.ASYNC_PAYMENT_FAILED
     case 'checkout.session.async_payment_failed': {
       const checkoutSessionAsyncPaymentFailed = event.data.object;
-      console.log('Session', checkoutSessionAsyncPaymentFailed.id, 'async payment failed');
+      console.log(
+        'Session',
+        checkoutSessionAsyncPaymentFailed.id,
+        'async payment failed',
+      );
 
       try {
-        const result = await Appointment.deleteMany(
-          { checkout: checkoutSessionAsyncPaymentFailed.id, status: 'cart' },
-        );
+        const result = await Appointment.deleteMany({
+          checkout: checkoutSessionAsyncPaymentFailed.id,
+          status: 'cart',
+        });
 
         console.log(`${result.deletedCount} deleted`);
       } catch (error) {
@@ -38,7 +43,11 @@ const handleWebhook = async (req, res) => {
     // CHECKOUT.SESSION.ASYNC_PAYMENT_SUCCEEDED
     case 'checkout.session.async_payment_succeeded': {
       const checkoutSessionAsyncPaymentSucceeded = event.data.object;
-      console.log('Session', checkoutSessionAsyncPaymentSucceeded.id, 'async payment succeeded');
+      console.log(
+        'Session',
+        checkoutSessionAsyncPaymentSucceeded.id,
+        'async payment succeeded',
+      );
       try {
         const result = await Appointment.updateMany(
           { checkout: checkoutSessionAsyncPaymentSucceeded.id },
@@ -81,7 +90,9 @@ const handleWebhook = async (req, res) => {
           { $set: { status: 'paid' } },
         );
 
-        const appointments = await Appointment.find({ checkout: checkoutSessionCompleted.id });
+        const appointments = await Appointment.find({
+          checkout: checkoutSessionCompleted.id,
+        });
 
         // const attendeeEmail = checkoutSessionCompleted.customer_email
         // || checkoutSessionCompleted.customer_details.email;
@@ -112,9 +123,10 @@ const handleWebhook = async (req, res) => {
       const checkoutSessionExpired = event.data.object;
       console.log('Session', checkoutSessionExpired.id, 'expired');
       try {
-        const result = await Appointment.deleteMany(
-          { checkout: checkoutSessionExpired.id, status: 'cart' },
-        );
+        const result = await Appointment.deleteMany({
+          checkout: checkoutSessionExpired.id,
+          status: 'cart',
+        });
 
         console.log(`${result.deletedCount} deleted`);
       } catch (error) {
