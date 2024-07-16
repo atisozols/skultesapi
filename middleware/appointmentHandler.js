@@ -2,17 +2,17 @@ const moment = require('moment');
 const Appointment = require('../model/Appointment');
 const pricing = require('../config/pricing');
 const timeslots = require('../config/timeslots');
+const calculatePricing = require('../utilities/calculatePricing');
 
 const createAppointmentMiddleware = async (req, res, next) => {
   const cart = [];
   try {
     const conflictingAppointments = req.body.map((appointment) => {
-      // Check pricing availability based on start and end range
-      const startRange = appointment.start_index;
-      const endRange = appointment.end_index;
-      const selectedPricing =
-        startRange > 30 ? pricing.standard : pricing.morning;
-      const price = selectedPricing[endRange - startRange];
+      const price = calculatePricing(
+        appointment.start_index,
+        appointment.end_index,
+        appointment.date
+      );
 
       if (!price) {
         return res.status(400).send({
@@ -48,19 +48,29 @@ const createAppointmentMiddleware = async (req, res, next) => {
         status: 'paid' || 'cart',
         $or: [
           {
-            'range.start.index': { $lt: endRange },
-            'range.end.index': { $gt: startRange },
+            'range.start.index': { $lt: appointment.end_index },
+            'range.end.index': { $gt: appointment.start_index },
           },
           {
             $and: [
-              { 'range.start.index': { $gte: startRange, $lt: endRange } },
-              { 'range.end.index': { $gt: endRange } },
+              {
+                'range.start.index': {
+                  $gte: appointment.start_index,
+                  $lt: appointment.end_index,
+                },
+              },
+              { 'range.end.index': { $gt: appointment.end_index } },
             ],
           },
           {
             $and: [
-              { 'range.start.index': { $lt: startRange } },
-              { 'range.end.index': { $lte: endRange, $gt: startRange } },
+              { 'range.start.index': { $lt: appointment.start_index } },
+              {
+                'range.end.index': {
+                  $lte: appointment.end_index,
+                  $gt: appointment.start_index,
+                },
+              },
             ],
           },
         ],
@@ -73,8 +83,8 @@ const createAppointmentMiddleware = async (req, res, next) => {
     const conflictingTimeslots = results.flatMap((appointments) =>
       appointments.map(
         (appointment) =>
-          `${appointment.range.start.time}-${appointment.range.end.time}`,
-      ),
+          `${appointment.range.start.time}-${appointment.range.end.time}`
+      )
     );
 
     const uniqueConflictingTimeslots = [...new Set(conflictingTimeslots)];
